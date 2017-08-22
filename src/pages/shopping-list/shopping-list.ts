@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ActionSheetController } from 'ionic-angular';
+import { NavController, NavParams, ActionSheetController } from 'ionic-angular';
 import { AddShoppingPage } from '../add-shopping/add-shopping';
 import { EditShoppingItemPage } from '../edit-shopping-item/edit-shopping-item';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
