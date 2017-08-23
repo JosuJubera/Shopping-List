@@ -1,35 +1,69 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
-import { UserItem } from "../../models/user-item/user-item.interface";
-import { AngularFireAuth } from 'angularfire2/auth';
+import { NavController, LoadingController, Loading, AlertController } from 'ionic-angular';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthProvider } from '../../providers/auth/auth';
+import { EmailValidator } from '../../validators/email';
 import { ShoppingListPage } from '../shopping-list/shopping-list';
 import { RegisterPage } from '../register/register';
+import { ResetPasswordPage } from '../reset-password/reset-password';
 
 @Component({
   selector: 'page-login',
-  templateUrl: 'login.html',
+  templateUrl: 'login.html'
 })
 export class LoginPage {
 
-  user = {} as UserItem;
+  public loginForm: FormGroup;
+  public loading: Loading;
 
-  constructor(private afAuth: AngularFireAuth,
-    public navCtrl: NavController, public navParams: NavParams) {
+  constructor(
+    public navCtrl: NavController,
+    public authData: AuthProvider,
+    public formBuilder: FormBuilder,
+    public alertCtrl: AlertController,
+    public loadingCtrl: LoadingController
+  ) {
+
+    this.loginForm = formBuilder.group({
+      email: ['', Validators.compose([Validators.required, EmailValidator.isValid])],
+      password: ['', Validators.compose([Validators.minLength(6), Validators.required])]
+    });
   }
- 
-  async login(user: UserItem) {
-    try {
-      const result = this.afAuth.auth.signInWithEmailAndPassword(user.email, user.password);
-      if (result) {
-        this.navCtrl.setRoot(ShoppingListPage);
-      }  
-    }
-    catch (e) {
-      console.error(e);
+
+  loginUser() {
+    if (!this.loginForm.valid) {
+      // console.log(this.loginForm.value);
+    } else {
+      this.authData.loginUser(this.loginForm.value.email, this.loginForm.value.password)
+        .then(authData => {
+          this.navCtrl.setRoot(ShoppingListPage);
+        }, error => {
+          this.loading.dismiss().then(() => {
+            let alert = this.alertCtrl.create({
+              message: error.message,
+              buttons: [
+                {
+                  text: "Ok",
+                  role: 'cancel'
+                }
+              ]
+            });
+            alert.present();
+          });
+        });
+
+      this.loading = this.loadingCtrl.create({
+        dismissOnPageChange: true,
+      });
+      this.loading.present();
     }
   }
- 
-  register() {
+
+  goToResetPassword() {
+    this.navCtrl.push(ResetPasswordPage);
+  }
+
+  createAccount() {
     this.navCtrl.push(RegisterPage);
   }
 }

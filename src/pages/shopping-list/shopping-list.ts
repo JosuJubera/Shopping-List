@@ -3,7 +3,9 @@ import { NavController, NavParams, ActionSheetController } from 'ionic-angular';
 import { AddShoppingPage } from '../add-shopping/add-shopping';
 import { EditShoppingItemPage } from '../edit-shopping-item/edit-shopping-item';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { ShoppingItem } from '../../models/shopping-item/shopping-item.interface'
+import { ShoppingItem } from '../../models/shopping-item/shopping-item.interface';
+import { AuthProvider } from '../../providers/auth/auth';
+import { LoginPage } from '../login/login';
 
 @Component({
   selector: 'page-shopping-list',
@@ -17,12 +19,16 @@ export class ShoppingListPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private database: AngularFireDatabase,
-    private ActionSheetCtrl: ActionSheetController
+    private ActionSheetCtrl: ActionSheetController,
+    public authData: AuthProvider
   ) {
-    // Point shoppingListRef$ at firebase -> 'shopping-list' node.
+    // Get current user Id
+    var currentUserId = this.authData.afAuth.auth.currentUser.uid;
+
+    // Point shoppingListRef$ at firebase user -> 'shopping-list' node.
     // That means not only can we push things from this reference to the 
     // database, but ALSO we have accessto everything inside of that node.
-    this.shoppingListRef$ = this.database.list('shopping-list');
+    this.shoppingListRef$ = this.database.list(`${currentUserId}/shopping-list`);
 
     // Show all the shopping-list on the console
     //this.shoppingListRef$.subscribe(x => console.log(x));
@@ -69,4 +75,8 @@ export class ShoppingListPage {
     this.navCtrl.push(AddShoppingPage);
   }
 
+  logout() {
+    this.authData.logoutUser();
+    this.navCtrl.setRoot(LoginPage);
+  }
 }

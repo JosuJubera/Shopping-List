@@ -7,6 +7,7 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 
+import { AuthProvider } from '../providers/auth/auth';
 import { MyApp } from './app.component';
 import { ShoppingListPage } from '../pages/shopping-list/shopping-list';
 import { AddShoppingPage } from '../pages/add-shopping/add-shopping';
@@ -14,6 +15,7 @@ import { EditShoppingItemPage } from '../pages/edit-shopping-item/edit-shopping-
 import { FIREBASE_CREDENTIALS } from './firebase.credentials';
 import { RegisterPage } from '../pages/register/register';
 import { LoginPage } from '../pages/login/login';
+import { ResetPasswordPage } from '../pages/reset-password/reset-password';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,8 @@ import { LoginPage } from '../pages/login/login';
     AddShoppingPage,
     EditShoppingItemPage,
     RegisterPage,
-    LoginPage
+    LoginPage,
+    ResetPasswordPage
   ],
   imports: [
     BrowserModule,
@@ -40,11 +43,13 @@ import { LoginPage } from '../pages/login/login';
     AddShoppingPage,
     EditShoppingItemPage,
     RegisterPage,
-    LoginPage
+    LoginPage,
+    ResetPasswordPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
+    AuthProvider,
     { provide: ErrorHandler, useClass: IonicErrorHandler }
   ]
 })

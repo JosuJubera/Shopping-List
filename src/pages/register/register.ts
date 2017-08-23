@@ -1,32 +1,66 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
-import { UserItem } from "../../models/user-item/user-item.interface";
-import { AngularFireAuth } from "angularfire2/auth";
+import { NavController, LoadingController, Loading, AlertController } from 'ionic-angular';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthProvider } from '../../providers/auth/auth';
 import { ShoppingListPage } from '../shopping-list/shopping-list';
+import { EmailValidator } from '../../validators/email';
 
 @Component({
   selector: 'page-register',
-  templateUrl: 'register.html',
-  providers: [AngularFireAuth]
+  templateUrl: 'register.html'
 })
 export class RegisterPage {
 
-  user = {} as UserItem;
+  public registerForm: FormGroup;
+  public loading: Loading;
 
-  constructor(private afAuth: AngularFireAuth,
-    public navCtrl: NavController, public navParams: NavParams) {
+  constructor(
+    public nav: NavController,
+    public authData: AuthProvider,
+    public formBuilder: FormBuilder,
+    public loadingCtrl: LoadingController,
+    public alertCtrl: AlertController
+  ) {
+
+    this.registerForm = formBuilder.group({
+      email: ['', Validators.compose([Validators.required, EmailValidator.isValid])],
+      password: ['', Validators.compose([Validators.minLength(6), Validators.required])]
+    });
   }
 
-  async register(user: UserItem) {
-    try {
-      const result = await this.afAuth.auth.createUserWithEmailAndPassword(user.email, user.password);
-      // console.log(result);
-      if (result) {
-        this.navCtrl.setRoot(ShoppingListPage);
-      } 
-    }
-    catch (e) {
-      console.error(e);
+  /**
+   * If the form is valid it will call the AuthData service to sign the user up password displaying a loading
+   *  component while the user waits.
+   *
+   * If the form is invalid it will just log the form value, feel free to handle that as you like.
+   */
+  async registerUser() {
+    if (!this.registerForm.valid) {
+      // console.log(this.registerForm.value);
+    } else {
+      this.authData.registerUser(this.registerForm.value.email, this.registerForm.value.password)
+        .then(() => {
+          this.nav.setRoot(ShoppingListPage);
+        }, (error) => {
+          this.loading.dismiss().then(() => {
+            var errorMessage: string = error.message;
+            let alert = this.alertCtrl.create({
+              message: errorMessage,
+              buttons: [
+                {
+                  text: "Ok",
+                  role: 'cancel'
+                }
+              ]
+            });
+            alert.present();
+          });
+        });
+
+      this.loading = this.loadingCtrl.create({
+        dismissOnPageChange: true,
+      });
+      this.loading.present();
     }
   }
 }
